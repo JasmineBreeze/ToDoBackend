@@ -1,19 +1,28 @@
-
+  
 service: todo-application-backend
-
-
 provider:
   name: aws
-  runtime: nodejs12.x
   region: eu-west-1
+  runtime: nodejs12.x
 
 functions:
-  tasks:
-    handler: tasks.handler
+  developers:
+    handler: handler.app
     events:
-      -http:
-          path: tasks
+      - http:
           method: get
+          path: tasks
           cors: true
-          
-
+      - http:
+          method: post
+          path: tasks
+          cors: true
+      - http:
+          method: put
+          path: tasks/{id}
+          cors: true
+      - http: 
+          method: delete
+          path: tasks/{id}
+          cors: true 
+        
