@@ -19,38 +19,32 @@ const connection = mysql.createConnection({
 
 app.get("/tasks", function (request, response) {
 
-
-  response.status(200).json({
-    tasks: [
-      {
-        id: 1,
-        item: "Do Washing",
-        dateDue: "2020-01-29",
-        edit: false
-      },
-      {
-        id: 2,
-        item: "Write Songs",
-        dateDue: "2020-02-29",
-        edit: false
-      },
-      {
-        id: 3,
-        item: "Do Homework",
-        dateDue: "2020-02-05",
-        edit: false
-      }
-    ]
+  connection.query("SELECT * FROM Task", function (err, data) {
+    if (err) {
+      response.status(500).json({
+        error: err
+      });
+    } else {
+      response.status(200).json({
+        tasks: data
+      });
+    }
   });
 });
+
+
 
 // POST 
 
 app.post("/tasks", function (request, response) {
   const newTask = request.body;
-
-  response.status(200).json({
-    message: `Successfully added to do item: ${newTask.item}, due for: ${newTask.dateDue}`
+  connection.query("INSERT INTO Task SET ?", [newTask], function (err, data) {
+    if (err) {
+      response.status(500).json({ error: err });
+    } else {
+      newTask.id = data.insertId;
+      response.status(201).json(newTask);
+    }
   });
 });
 
@@ -62,19 +56,30 @@ app.put("/tasks/:id", function (request, response) {
   const updatedTask = request.body;
   const id = request.params.id;
 
-  response.status(200).json({
-    message: `Successfully updated task ID ${id} with item: ${updatedTask.item}, due for: ${updatedTask.dateDue}`
-  });
+  connection.query('UPDATE Task SET ? WHERE id= ?', [updatedTask, id],
+    function (err) {
+      if (err) {
+        response.status(500).json({ error: err });
+      }
+      else {
+        response.sendStatus(200);
+      }
+    });
 });
 
-// DELETE /developers
+// DELETE 
 
 app.delete("/tasks/:id", function (request, response) {
   const deletedTask = request.body;
   const id2 = request.params.id;
-
-  response.status(200).json({
-    message: `Successfully deleted task ID ${id2} with name: ${deletedTask.item}`
+  connection.query('DELETE FROM Task WHERE id=?', [id2], function (err) {
+    if (err) {
+      response.status(500).json({
+        error: err
+      });
+    } else {
+      response.sendStatus(200);
+    }
   });
 });
 
